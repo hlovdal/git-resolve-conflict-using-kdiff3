@@ -1,0 +1,6 @@
+#!/bin/sh
+
+DIR=`dirname $0`
+
+exec perl -I"$DIR" "$DIR"/git-resolve-conflict-using-kdiff3.pl "$@"
+
