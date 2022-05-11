@@ -122,6 +122,62 @@ sub blob2file {
 	return $tempfilename;
 }
 
+sub git_add_file_from_blob {
+	my $filename = shift;
+	my $sha1 = shift;
+	my $file_to_add = blob2file($filename, $sha1);
+	system("mv", $file_to_add, $filename);
+	system("git", "add", $filename);
+}
+
+sub rebase_ongoing {
+	my $git_dir = shift;
+	return (-d "$git_dir/rebase-merge" || -d "$git_dir/rebase-apply");
+}
+sub merge_ongoing {
+	my $git_dir = shift;
+	return (-f "$git_dir/MERGE_HEAD");
+}
+sub cherry_pick_ongoing {
+	my $git_dir = shift;
+	return (-f "$git_dir/CHERRY_PICK_HEAD");
+}
+sub imerge_ongoing {
+	my $git_dir = shift;
+	my $branch_name = `git symbolic-ref HEAD`;
+	return $branch_name =~ /^refs\/heads\/imerge/;
+}
+
+sub print_continue_commands {
+	my $git_dir = shift;
+	system("git", "status");
+
+	print "Command(s) suggested to continue:\n\n\n";
+	if (any_files_modified()) {
+		print "git diff --cached\n\n";
+	}
+	if (rebase_ongoing($git_dir)) {
+		if (any_files_modified()) {
+			print "git rebase --continue\n";
+		} else {
+			print "git rebase --skip\n";
+		}
+	} elsif (imerge_ongoing($git_dir)) {
+		print "git imerge continue\n";
+	} elsif (cherry_pick_ongoing($git_dir) || merge_ongoing($git_dir)) {
+		print "git commit\n";
+	}
+	print "\n\n";
+}
+
+sub operation_ongoing {
+	my $git_dir = shift;
+	return 1 if rebase_ongoing($git_dir);
+	return 1 if imerge_ongoing($git_dir);
+	return 1 if (cherry_pick_ongoing($git_dir) || merge_ongoing($git_dir));
+	return 0;
+}
+
 ################################################################################
 
 my $git_dir = `git rev-parse --git-dir`;
@@ -139,9 +195,14 @@ chomp($git_toplevel_dir);
 my @unmerged_files = find_unmerged_files($git_toplevel_dir); # modifies %one, %two and %three as well
 
 if (scalar(@unmerged_files) == 0) {
-	print "$0: error: no files in conflict\n\n";
-	help();
-	exit 1;
+	if (operation_ongoing($git_dir)) {
+		print_continue_commands($git_dir);
+		exit 0;
+	} else {
+		print "$0: error: no files in conflict\n\n";
+		help();
+		exit 1;
+	}
 }
 
 print '=' x $terminal_width, "\n";
@@ -211,8 +272,20 @@ foreach my $file (@unmerged_files) {
 			next;
 		}
 	}
-	if ($file_removed) {
-		$input = prompt("Remove " . colored($file, 'green' ) . " (or skip/quit)?", "RrSsQq", "?");  # No default choice
+	if ($file_removed == 2) {
+		$input = prompt("Remove or add from ${three_descr} " . colored($file, 'green' ) . " (or skip/quit)?", "RrAaSsQq", "?");  # No default choice
+		last if $input =~ /^[Qq]/;
+		if ($input =~ /^[Aa]/) {
+			git_add_file_from_blob($file, $three{$file});
+			next;
+		} elsif ($input =~ /^[Rr]/) {
+			system("git", "rm", $file);
+			next;
+		} elsif ($input =~ /^[Ss]/) {
+			next;
+		}
+	} elsif ($file_removed) {
+		$input = prompt("Remove " . colored($file, 'green' ) . " (or skip/quit)?", "RrSsQq", "r");
 		last if $input =~ /^[Qq]/;
 		if ($input =~ /^[Rr]/) {
 			system("git", "rm", $file);
@@ -222,9 +295,26 @@ foreach my $file (@unmerged_files) {
 		}
 	}
 
-	$input = prompt("Launch kdiff3 for " . colored($file, 'green' ) . "?", "YyNnQq", "y");
+	my $override = "";
+	$override = $override . "1" if defined $one{$file};
+	$override = $override . "2" if defined $two{$file};
+	$override = $override . "3" if defined $three{$file};
+	$input = prompt("Launch kdiff3 for " . colored($file, 'green' ) . "?", "YyNnQq$override", "y");
 	last if $input =~ /^[Qq]/;
 	next if $input =~ /^[Nn]/;
+
+	if ($input =~ /^[1]/ && defined $one{$file}) {
+		git_add_file_from_blob($file, $one{$file});
+		next;
+	}
+	if ($input =~ /^[2]/ && defined $two{$file}) {
+		git_add_file_from_blob($file, $two{$file});
+		next;
+	}
+	if ($input =~ /^[3]/ && defined $three{$file}) {
+		git_add_file_from_blob($file, $three{$file});
+		next;
+	}
 
 	my @input_files = ();
 	push @input_files, blob2file($file, $one{$file}  ) if defined $one{$file};
@@ -243,26 +333,5 @@ foreach my $file (@unmerged_files) {
 
 }
 
-system("git", "status");
-
-print "Command(s) suggested to continue:\n\n\n";
-if (-d "$git_dir/rebase-merge" || -d "$git_dir/rebase-apply") {
-	if (any_files_modified()) {
-		print "git diff --cached\n\n";
-		print "git rebase --continue\n";
-	} else {
-		print "git rebase --skip\n";
-	}
-} elsif (-f "$git_dir/REVERT_HEAD") {
-	if (any_files_modified()) {
-		print "git diff --cached\n\n";
-		print "git revert --continue\n";
-	} else {
-		print "git revert --abort\n";
-	}
-} elsif (-f "$git_dir/CHERRY_PICK_HEAD" || -f "$git_dir/MERGE_HEAD") {
-	print "git diff --cached\n\n";
-	print "git commit\n";
-}
-print "\n\n";
+print_continue_commands($git_dir);
 
