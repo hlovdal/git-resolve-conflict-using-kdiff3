@@ -16,6 +16,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+my $version = "0.1.0";
+
 use warnings;
 use strict;
 # use diagnostics; Depends on perl_pods package on cygwin (not installed by default, https://stackoverflow.com/a/36538115/23118). Not available in git-for-windows.
@@ -189,6 +191,8 @@ sub get_filemode {
 }
 
 ################################################################################
+
+print "$0 version $version. GPLv3\n";
 
 my $git_dir = `git rev-parse --git-dir`;
 chomp($git_dir);
