@@ -1,0 +1,10 @@
+*       text eol=lf
+
+*.md    text eol=lf diff=markdown
+*.pl    text eol=lf diff=perl
+*.pm    text eol=lf diff=perl
+*.sh    text eol=lf diff=bash
+
+*.png   binary
+*.jpg   binary
+*.pdf   binary
