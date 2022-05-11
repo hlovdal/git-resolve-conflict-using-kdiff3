@@ -6,22 +6,23 @@ a 3-way merge view to resolve the conflicts.
 
 ## Benefits
 
-By default git will add text conflict markers in the file with conflict, but
-that is only giving context from **two** versions, having a full **3-way** context
-is vastly superior (as well as being graphical is much easier to easier to
-review).
+By default git will just add text conflict markers in the file with conflict,
+but that is only giving context from **two** versions, having a full **3-way**
+context is vastly superior (as well as being graphical is much easier to easier
+to review).
 
 And by using KDiff3 you will able to both review (and override) all the
 automatically resolved conflicts. Being able to see which versions that were
 selected automatically can often be a big help in determing how to resolve
 conflicts that were not automatically resolved.
 
-# Usage/example
+# Usage
 
-## Create repository with a conflict
+## Example repository with a conflict
 
-Modifying `.gitignore` on two branches, same change but one of them
-also adds a comment.
+This is an example where the file `.gitignore` is modified on two branches,
+which results in a conflict when rebasing. The changes are basically the same
+but one of them also adds a comment.
 
 ```bash
 $ git init
@@ -77,7 +78,7 @@ KDiff3 to resolve this automatically:
 ![KDiff3 screenshot, manual diff alignmet](doc/images/kdiff3_manual_diffalignment.png)
 
 Saving and quiting KDiff3, the script asks if you are satisfied with the result
-and want to add the file:
+and want to add the file to the index:
 
 ![Running script screenshot](doc/images/run_script_002.png)
 
