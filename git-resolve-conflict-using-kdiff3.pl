@@ -72,14 +72,16 @@ sub find_unmerged_files {
 	my $toplevel_dir = shift @_;
 	my %tmp;
 	open(PIPE, "git ls-files --unmerged " . shell_quote($toplevel_dir) . " -z |");
-	foreach my $line (split(/\0/, <PIPE>)) {
-		chomp($line);
-		my ($prefix, $file) = split(/\t/, $line);
-		my (undef, $sha, $number) = split(/ /, $prefix);
-		$one{$file}   = $sha if $number == 1;
-		$two{$file}   = $sha if $number == 2;
-		$three{$file} = $sha if $number == 3;
-		$tmp{$file} = 0;
+	if (not eof(PIPE)) {
+		foreach my $line (split(/\0/, <PIPE>)) {
+			chomp($line);
+			my ($prefix, $file) = split(/\t/, $line);
+			my (undef, $sha, $number) = split(/ /, $prefix);
+			$one{$file}   = $sha if $number == 1;
+			$two{$file}   = $sha if $number == 2;
+			$three{$file} = $sha if $number == 3;
+			$tmp{$file} = 0;
+		}
 	}
 	close(PIPE);
 	return keys %tmp;
