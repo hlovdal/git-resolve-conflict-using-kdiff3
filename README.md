@@ -103,12 +103,7 @@ git checkout runtime-windows      # Choose one of these
 export PATH="$PATH:/some/where/git-resolve-conflict-using-kdiff3"
 ```
 
-Otherwise follow instructions in [INSTALL.md](./INSTALL.md):
-
-# Troubleshooting
-
-Make sure that the scripts have the execute bit set (e.g.
-`chmod +x $HOME/bin/git-resolve-conflict-using-kdiff3`).
+Otherwise follow [install instructions](./doc/INSTALL.md).
 
 # Background/history
 
