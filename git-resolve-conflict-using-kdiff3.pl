@@ -180,6 +180,14 @@ sub operation_ongoing {
 	return 0;
 }
 
+sub get_filemode {
+	my $file = shift;
+	# Reference "oct" in in perlfunc
+	my $dec_perms = (stat($file))[2] & 07777;
+	my $oct_perm_str = sprintf "%o", $dec_perms;
+	return $oct_perm_str;
+}
+
 ################################################################################
 
 my $git_dir = `git rev-parse --git-dir`;
@@ -329,6 +337,10 @@ foreach my $file (@unmerged_files) {
 	unlink("$file.merged") unless $input =~ /^[Yy]/;
 	last if $input =~ /^[Qq]/;
 	next if $input =~ /^[Nn]/;
+
+	# Preserve file premission
+	my $mode = get_filemode($file);
+	chmod $mode, "$file.merged";
 
 	system("mv", "$file.merged", $file);
 	system("git", "add", $file);
