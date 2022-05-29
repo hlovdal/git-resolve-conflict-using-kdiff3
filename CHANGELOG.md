@@ -19,6 +19,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## [0.1.1] - 2022-05-29
+
+### Changed
+
+- Move install section in readme to separate document.
+
+### Fixed
+
+- Fixed incorrect argument handling for the code that tries to preserve file
+  permission.
+
 ## [0.1.0] - 2022-05-12
 
 ### Added
