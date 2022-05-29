@@ -187,8 +187,7 @@ sub get_filemode {
 	my $file = shift;
 	# Reference "oct" in in perlfunc
 	my $dec_perms = (stat($file))[2] & 07777;
-	my $oct_perm_str = sprintf "%o", $dec_perms;
-	return $oct_perm_str;
+	return $dec_perms;
 }
 
 ################################################################################
