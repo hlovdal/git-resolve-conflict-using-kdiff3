@@ -58,3 +58,8 @@ E.g.
 ```bash
 cp helpers/kdiff3 $HOME/bin/.
 ```
+
+## Troubleshooting
+
+Make sure that the scripts have the execute bit set (e.g.
+`chmod +x $HOME/bin/git-resolve-conflict-using-kdiff3`).
