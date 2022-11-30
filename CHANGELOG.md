@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fix missing execute bit on wrapper script.
+
 ### Security
 
 ## [0.1.1] - 2022-05-29
