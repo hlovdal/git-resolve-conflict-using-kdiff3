@@ -89,7 +89,7 @@ With all conflicts resolved, you can run `git rebase --continue`.
 This script has the following external dependencies:
 
 * perl (which you will already have when using git)
-* KDiff3
+* [KDiff3](http://kdiff3.sourceforge.net/)
 
 If you want to run the script directly from a clone of this repository,
 you can do so:
